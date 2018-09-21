@@ -12,7 +12,7 @@
 
 ## About
 
-This app uses Object Oriented Programming in javascript to create the popular arcade game 'FROGGER'. Feel free to check it out [HERE](https://mhizterpaul.github.io/arcade-game).
+This app uses Object Oriented Programming in javascript to create the popular arcade game 'FROGGER'. Feel free to check it out [HERE](https://mhizterpaul.github.io/arcade-game/).
 I also would appreciate any feedbacks as some bugs might have escaped my diligent and meticulous tests.
 
 
