@@ -137,7 +137,7 @@ section.intro {
 }
 
 .scorepanel button{
-    margin-top: 58px;
+    margin-bottom: 58px;
     transform: translateY(28px);
     width: 65px;
     height: 60px
