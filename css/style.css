@@ -17,7 +17,7 @@ body {
     padding: 0;
     text-align: center;
     font: 17px  Helvetica,sans-serif;
-    background: fixed border-box linear-gradient(135deg, #2f1c53, #a46dff, #f6d1fd ) no-repeat center/100% 180vh;
+    background: fixed border-box linear-gradient(135deg, #a46dff, #f6d1fd ) no-repeat center/100% 180vh;
 }
 
 canvas {
@@ -111,13 +111,12 @@ section.intro {
     align-items: center;
     background-color: silver;
     width: 300px;
-    height: 90%;
+    height: 90vh;
     margin: auto;
     margin-top: 20px;
     color: #545454;
     padding: 15px;
     border-radius: 8px;
-    min-height: 580px;
 }
 
 .message h2 {
@@ -138,7 +137,7 @@ section.intro {
 }
 
 .scorepanel button{
-    margin: 0;
+    margin-top: 58px;
     transform: translateY(28px);
     width: 65px;
     height: 60px
