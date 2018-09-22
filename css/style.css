@@ -90,20 +90,22 @@ section.intro {
     display: block;
     margin: auto;
     pointer-events: none;
-    margin-top: 0;
+    margin-top: -71px;
 }
 
 .message button {
-    margin-bottom: 25px;
     width: 100px;
     padding: 10px;
     border-radius: 10px;
     font-size: 1.2em;
     color: #545454;
 }
+
 .message button:first-of-type {
-    margin-top: 50px
+    margin-top: 30px;
+    margin-bottom: 25px;
 }
+
 .message {
     display: flex;
     flex-flow: column nowrap;
@@ -158,6 +160,7 @@ section.intro {
     margin: 0;
     padding: 0;
     pointer-events: none;
+
 }
 
 .hide {

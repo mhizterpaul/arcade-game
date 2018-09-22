@@ -282,6 +282,10 @@ const myGameLogic = (function() {
     function endGame() {
       document.querySelector('.scorepanel').classList.add('hide');
       document.querySelector('canvas').classList.add('hide');
+      const chars = document.querySelector('.message p').children;
+      for (const char of chars ){
+        char.remove();
+      }
       if(level === 11 && heart > 0){
         message.firstElementChild.textContent = 'Congratulations!!!';
         message.firstElementChild.style.marginBottom = '0';
@@ -308,7 +312,7 @@ const myGameLogic = (function() {
     if (init !== true){
         document.querySelector('.heart').textContent = ''
       for(const heart of hearts){
-        child.remove();
+        heart.remove();
       }
       for(let i = 0; i < 4; i++){
         const img = new Image();
