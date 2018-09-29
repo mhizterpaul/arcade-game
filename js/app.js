@@ -176,7 +176,7 @@ const myGameLogic = (function() {
                     this.heart += 1;
                     break;
                   case 2 :
-                    if(environment.level === 11) environment.endGame();
+                    if(environment.level === 11) environment.endGame(); break;
                     environment.level += 1;
                     environment.x -= 0.175;
                     environment.updateScorePanel();
