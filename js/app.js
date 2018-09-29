@@ -1,15 +1,9 @@
 /*
 **ARCADE GAME BY MR.PAUL(this content is licensed under the MIT license @https://opensource.or/licenses/mit-license.php)
 */
-
+'use strict';
 
 const myGameLogic = (function() {
-  //initialize all required variables
-   let idx, dx, dy, interval, interval1, interval2, difficulty ,level = 1, x = 1.75, heart = 4, init, star, key, stop, stone, win, interval3;
-   const message = document.querySelector('.message');
-   let defaultRender = function() {
-        access.ctx.drawImage(Resources.get(this.sprite), 0, 53, 101, 108, this.dx, this.dy-31, access.imgWidth, access.imgHeight+22); 
-      };
 
   //EnemyClass
     class Enemy {
@@ -21,16 +15,29 @@ const myGameLogic = (function() {
         }
 
         update (dt) {
-          if(stop === true) return;
+
+          if(environment.stop === true) return;
           if (this.dx >= 5*access.imgWidth){
             this.dx = -access.imgWidth;
             this.dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
-            this.speed = (5*access.imgWidth) / ( Math.floor(1.9 * Math.random()) + 0.25 + x + this.random(0) + this.random(1));
+            this.speed = (5*access.imgWidth) / ( Math.floor(1.9 * Math.random()) + 0.25 + environment.x + this.random(0) + this.random(1));
           }else{
+            this.dx +=  this.speed*dt;
 
-            this.dx += this.speed*dt;
+          } 
+          if (environment.star === true || environment.key === true) return; 
+          if (this.dx+access.imgWidth > player.dx && player.dy === this.dy && player.dx > this.dx ||
+            player.dx+access.imgWidth > this.dx && player.dy === this.dy && player.dx < this.dx ) {
+            player.dx = 2*access.imgWidth;
+            player.dy = 5*access.imgHeight;
+            if (player.heart  === 1){
+              player.heart -= 1;
+              environment.endGame();
+            }else {
+               player.heart -= 1;
+              document.querySelector('.heart').firstElementChild.remove();
+            }
           }
-
         }
 
         render () {
@@ -40,6 +47,7 @@ const myGameLogic = (function() {
         random(num) {
           return num === 0 ? Math.floor(1.9 * Math.random())/2 : Math.floor(1.9 * Math.random())/4;
         }
+
     }
 
     //player class
@@ -49,25 +57,27 @@ const myGameLogic = (function() {
         this.sprite = character;
         this.dx = 2*access.imgWidth;
         this.dy = 5*access.imgHeight;
+        this.heart = 4;
+        this.win = false;
        }
 
         handleInput(allowedKeys) {
             switch (allowedKeys) {
                 case 'left':
-                  if (this.dx === 0  || stone === 'left') break;
+                  if (this.dx === 0  || environment.stone === 'left') break;
                   this.dx -= access.imgWidth;
                   break;
                 case 'up':
 
-                  if (this.dy === 0 || stone === 'up') break;
+                  if (this.dy === 0 || environment.stone === 'up') break;
                   this.dy -= access.imgHeight;
                   break;
                 case 'right':
-                  if (this.dx === 4*access.imgWidth || stone === 'right') break;
+                  if (this.dx === 4*access.imgWidth || environment.stone === 'right') break;
                   this.dx += access.imgWidth;
                   break;
                 case 'down':
-                  if (this.dy === 5*access.imgHeight || stone === 'down') break;
+                  if (this.dy === 5*access.imgHeight || environment.stone === 'down') break;
                   this.dy += access.imgHeight;
             }
 
@@ -125,113 +135,114 @@ const myGameLogic = (function() {
           }    
           }
 
+          render(){
+            access.ctx.drawImage(Resources.get(this.sprite), 0, 53, 101, 108, this.dx, this.dy-31, access.imgWidth, access.imgHeight+22);
+          }
+
         update () {
 
-            if ( win === true ) return;
-            for (const enemy of allEnemies){ 
-              if (star === true || key === true) break; 
-              if (enemy.dx+access.imgWidth > this.dx && this.dy === enemy.dy && this.dx > enemy.dx ||
-                this.dx+access.imgWidth > enemy.dx && this.dy === enemy.dy && this.dx < enemy.dx ) {
-                this.dx = 2*access.imgWidth;
-                this.dy = 5*access.imgHeight;
-                if (heart  === 1){
-                  heart -= 1;
-                  endGame();
-                }else {
-                   heart -= 1;
-                  document.querySelector('.heart').firstElementChild.remove();
-                }
-              }
-            }
+            if ( this.win === true ) return;
+            
             if(this.dy === 0){
-              win = true;
+              this.win = true;
               setTimeout(() => {
                 this.dx = 2*access.imgWidth;
                 this.dy = 5*access.imgHeight;
-                win = false;
+                this.win = false;
               }, 200)
-              if (key === true) {
-                  key = false;
-                 startGemCountDown();
+              if (environment.key === true) {
+                  environment.key = false;
+                  environment.startGemCountDown();
                 }
-              if(level === 11) {
-                 endGame();
+              if(environment.level === 11) {
+                 environment.endGame();
               }else {
-                x -= 0.175;
-                level += 1;
-                updateScorePanel();
+                environment.x -= 0.175;
+                environment.level += 1;
+                environment.updateScorePanel();
               }
             }
-            if(this.render !== defaultRender && difficulty === 'easy' || difficulty === 'hard'){
-              if(dx === this.dx && this.dy === dy && idx < 6){
-                switch (idx) {
+            if( environment.defaultRender === false ){
+              if(environment.dx === this.dx && this.dy === environment.dy && environment.idx < 6){
+                switch (environment.idx) {
                   case 0 : 
-                    x += 5;
-                    interval3 = setTimeout(()=> x -= 5 , 3000);
+                    environment.x += 5;
+                    environment.interval3 = setTimeout(()=> environment.x -= 5 , 3000);
                     break;
                   case 1 :
                     const img = new Image();
                     img.src = 'images/Heart.png';
-                    document.querySelector('.scorepanel .heart').appendChild(img)
-                    heart += 1;
+                    document.querySelector('.heart').appendChild(img);
+                    this.heart += 1;
                     break;
                   case 2 :
-                    if(level === 11) endGame();
-                    level += 1;
-                    x -= 0.175;
-                    updateScorePanel();
+                    if(environment.level === 11) environment.endGame();
+                    environment.level += 1;
+                    environment.x -= 0.175;
+                    environment.updateScorePanel();
                     break;
                   case 3 : 
-                    star = true;
-                    setTimeout(()=> star = false , 3000);
+                    environment.star = true;
+                    setTimeout(()=> environment.star = false , 3000);
                     break;
                   case 4: 
-                    key = true;
-                    Player.prototype.render = defaultRender;
-                    clearInterval(interval);
-                    if (difficulty === 'hard'){
-                      idx= 6;
-                      dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
-                      dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
-                      randomStoneBlock();
+                    environment.key = true;
+                    clearInterval(environment.interval);
+                    if(environment.difficulty === 'easy'){
+                      environment.dx = undefined;
+                      environment.dy = undefined;
+                    }else {
+                      environment.idx= 6;
+                      environment.dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
+                      environment.dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
+                      environment.randomStoneBlock();
                     }
                     return;
                   case 5: 
-                    stop = true;
-                    setTimeout(()=> stop = false , 3000);
+                    environment.stop = true;
+                    setTimeout(()=> environment.stop = false , 3000);
 
                   }
-                Player.prototype.render = defaultRender;
-                if (difficulty === 'hard'){
-                  idx= 6;
-                  dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
-                  dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
-                  randomStoneBlock();
-                }
-                clearInterval(interval);
-                startGemCountDown();
-              }else if(this.dx+access.imgWidth === dx && dx > this.dx && dy === this.dy && idx === 6){
-                stone = 'right';
-              }else if(dx+access.imgWidth === this.dx && dx < this.dx && dy === this.dy && idx === 6){
-                stone = 'left';
-              }else if(this.dy+access.imgHeight === dy && dy > this.dy && dx === this.dx && idx === 6){
-                stone = 'down';
-              }else if(dy+access.imgHeight === this.dy && dy < this.dy && dx === this.dx && idx === 6){
-                stone = 'up';
+
+                  if (environment.difficulty === 'easy'){
+                    environment.dx = undefined;
+                    environment.dy = undefined;
+                    
+                  }else{
+                    environment.idx= 6;
+                    environment.dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
+                    environment.dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
+                    environment.randomStoneBlock();
+                  }
+                  clearInterval(environment.interval);
+                  environment.startGemCountDown();
+              }else if(this.dx+access.imgWidth === environment.dx && environment.dx > this.dx && environment.dy === this.dy && environment.idx === 6){
+                environment.stone = 'right';
+              }else if(environment.dx + access.imgWidth === this.dx && environment.dx < this.dx && environment.dy === this.dy && environment.idx === 6){
+                environment.stone = 'left';
+              }else if(this.dy+access.imgHeight === environment.dy && environment.dy > this.dy && environment.dx === this.dx && environment.idx === 6){
+                environment.stone = 'down';
+              }else if (environment.dy + access.imgHeight === this.dy && environment.dy < this.dy && environment.dx === this.dx && environment.idx === 6){
+                environment.stone = 'up';
               }else{
-                stone = undefined;
+                environment.stone = undefined;
               }
           }
         }
 
     }
 
-  Player.prototype.render = defaultRender;
-  window.player = new Player();
-  window.allEnemies = [new Enemy(), new Enemy(), new Enemy(), new Enemy()];
 
+    // environment class
+  class Environment {
 
-    function gemPlacement() {
+    constructor(){
+      this.idx = 6;
+      this.x = 1.75;
+      this.message = document.querySelector('.message');
+    }
+
+    render() {
       let myObjects = [
         'images/Gem Orange.png',
         'images/Gem Green.png',
@@ -240,129 +251,140 @@ const myGameLogic = (function() {
         'images/Key.png',
         'images/Selector.png',
         'images/Rock.png'];
-     
-      if (difficulty === 'hard') clearInterval(interval1);
-      dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
-      dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
-      idx = Math.floor(6.9 * Math.random());
-      Player.prototype.render = function() {
-        access.ctx.drawImage(Resources.get(myObjects[idx]), 0, 63, 101, 108, dx, dy-5, access.imgWidth, access.imgHeight-5);
-        access.ctx.drawImage(Resources.get(this.sprite), 0, 53, 101, 108, this.dx, this.dy-31, access.imgWidth, access.imgHeight+22); 
-      }
+      access.ctx.drawImage(Resources.get(myObjects[this.idx]), 0, 63, 101, 108, this.dx, this.dy-5, access.imgWidth, access.imgHeight-5);
+    }
 
-      interval = setTimeout(()=>{
-          Player.prototype.render = defaultRender;
-          if (difficulty === 'hard'){
-            idx= 6;
-            dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
-            dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
-            randomStoneBlock();
+    gemPlacement() {
+      if (this.difficulty === 'hard') clearInterval(this.interval1);
+      this.dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
+      this.dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
+      this.idx = Math.floor(6.9 * Math.random());
+      this.defaultRender = false;
+
+      this.interval = setTimeout(()=>{
+          if(this.difficulty === 'easy') {
+            this.dx = undefined;
+            this.dy = undefined;
+            this.stone = undefined;
+            this.defaultRender = true;
+        
+          }else{
+            this.idx= 6;
+            this.dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
+            this.dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
+            this.randomStoneBlock();
           } 
-          if (difficulty === 'easy') stone = undefined;
-          startGemCountDown();
+
+          this.startGemCountDown();
       }, 10000);
 
     }
 
-    function randomTime() {
+    randomTime() {
        return 3000*Math.random() + 10000;
     }
 
-    function startGemCountDown() {
-      interval2 = setTimeout(gemPlacement, randomTime());
+    startGemCountDown() {
+      this.interval2 = setTimeout(() => this.gemPlacement(), this.randomTime());
     }
 
-    function randomStoneBlock(){
-      interval1 = setInterval(()=>{
-          dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
-          dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
+    randomStoneBlock(){
+      this.interval1 = setInterval(()=>{
+          this.dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
+          this.dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
         }, 5000)
     }
 
-    function endGame() {
+    endGame() {
       document.querySelector('.scorepanel').classList.add('hide');
       document.querySelector('canvas').classList.add('hide');
       const chars = document.querySelector('.message p').children;
+
       for (const char of chars ){
         char.remove();
       }
-      if(level === 11 && heart > 0){
-        message.firstElementChild.textContent = 'Congratulations!!!';
-        message.firstElementChild.style.marginBottom = '0';
-        message.firstElementChild.nextElementSibling.textContent = `you managed to cross the bug runway 
+      if(this.level === 11 && player.heart > 0){
+        this.message.firstElementChild.textContent = 'Congratulations!!!';
+        this.message.firstElementChild.style.marginBottom = '0';
+        this.message.firstElementChild.nextElementSibling.textContent = `you managed to cross the bug runway 
                                                                     alive only a few legends have done this!!!. 
                                                                     You've proved your competence and now crowned the rightful heir to the throne.`;
 
         let El = Resources.get(`${player.sprite}`);
-        message.firstElementChild.nextElementSibling.prepend(El);
-        document.querySelector('.message').classList.remove('hide');
+        this.message.firstElementChild.nextElementSibling.prepend(El);
+        
       }else{
-        message.firstElementChild.textContent = 'game over!!!';
-        message.firstElementChild.style.marginBottom = '100px';
-        message.firstElementChild.nextElementSibling.textContent = 'it wasn\'t ever easy, only a few legends have been able to cross the bug runway. You can be one, but you have to work harder';
-        document.querySelector('.message').classList.remove('hide');
+        this.message.firstElementChild.textContent = 'game over!!!';
+        this.message.firstElementChild.style.marginBottom = '100px';
+        this.message.firstElementChild.nextElementSibling.textContent = 'it wasn\'t ever easy, only a few legends have been able to cross the bug runway. You can be one, but you have to work harder';
+        
       }
+      this.message.classList.remove('hide');
     }
 
-    function updateScorePanel(){
-    const scorePanel = document.getElementsByClassName('scorepanel')[0];
-    scorePanel.firstElementChild.textContent = `level: ${level}`;
-    scorePanel.lastElementChild.previousElementSibling.textContent = `difficulty: ${difficulty}`
-    const hearts = scorePanel.firstElementChild.nextElementSibling.children;
-    if (init !== true){
-        document.querySelector('.heart').textContent = ''
-      for(const heart of hearts){
-        heart.remove();
-      }
-      for(let i = 0; i < 4; i++){
-        const img = new Image();
-        img.src = 'images/Heart.png';
-        document.querySelector('.heart').appendChild(img);
-      }
-      if(difficulty === 'easy') init = true; startGemCountDown();
-      if(difficulty === 'hard' && init !== true ){
-        defaultRender = function() {
-          access.ctx.drawImage(Resources.get('images/Rock.png'), 0, 63, 101, 108, dx, dy-5, access.imgWidth, access.imgHeight-5);
-          access.ctx.drawImage(Resources.get(this.sprite), 0, 53, 101, 108, this.dx, this.dy-31, access.imgWidth, access.imgHeight+22); 
+    updateScorePanel(){
+      const scorePanel = document.getElementsByClassName('scorepanel')[0];
+      scorePanel.firstElementChild.textContent = `level: ${this.level}`;
+      scorePanel.lastElementChild.previousElementSibling.textContent = `difficulty: ${this.difficulty}`
+      const hearts = scorePanel.firstElementChild.nextElementSibling.children;
+      if (this.init !== true){
+          document.querySelector('.heart').textContent = ''
+          for(const heart of hearts){
+            heart.remove();
+          }
+          for(let i = 0; i < 4; i++){
+            const img = new Image();
+            img.src = 'images/Heart.png';
+            document.querySelector('.heart').appendChild(img);
+          }
+        if(this.difficulty === 'easy'){
+          this.init = true; 
+          this.startGemCountDown();
+
+        }else{
+          this.dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
+          this.dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
+          this.idx = 6;
+          this.defaultRender = false;
+          this.init = true;
+          this.randomStoneBlock();
+          this.startGemCountDown();
         }
-        Player.prototype.render = defaultRender;
-        dy = ( Math.floor(2.9 * Math.random()) + 1 ) * access.imgHeight;
-        dx =  Math.floor(4.9 * Math.random()) * access.imgWidth;
-        idx = 6;
-        init = true;
-        randomStoneBlock();
       }
+      document.getElementsByClassName('scorepanel')[0].classList.remove('hide');
+      document.getElementsByTagName('canvas')[0].classList.remove('hide');
     }
-    document.getElementsByClassName('scorepanel')[0].classList.remove('hide');
-    document.getElementsByTagName('canvas')[0].classList.remove('hide');
-  }
 
-  function reset() {
-    x = 1.75;
-    init = false;
-    level = 1;
-    heart = 4;
+  reset() {
+    this.x = 1.75;
+    this.init = false;
+    this.level = 1;
+    player.heart = 4;
+    if(this.difficulty === 'easy') this.dx = undefined; this.dy = undefined;
     player.dx = 2*access.imgWidth;
     player.dy = 5*access.imgHeight;
-    if (difficulty === 'hard') clearInterval(interval1);
-    clearInterval(interval);
-    clearInterval(interval1);
-    clearInterval(interval2);
-    clearInterval(interval3);
-    Player.prototype.render = defaultRender;
-    updateScorePanel();
-    message.classList.add('hide');
+    clearInterval(this.interval);
+    clearInterval(this.interval1);
+    clearInterval(this.interval2);
+    clearInterval(this.interval3);
+    this.updateScorePanel();
+    this.message.classList.add('hide');
   }
 
-  function restart() {
-    reset();
+  restart() {
+    this.reset();
     document.querySelector('.scorepanel').classList.add('hide');
     document.querySelector('canvas').classList.add('hide');
     document.querySelector('.intro').removeAttribute('hidden');
   }
+  }
 
+  //instantiate new environment, player and enemy objects;
+  window.environment = new Environment();
+  window.player = new Player();
+  window.allEnemies = [new Enemy(), new Enemy(), new Enemy(), new Enemy()];
 
-
+  
 
                       /*EVENT LISTENERS*/
 
@@ -393,19 +415,19 @@ document.querySelector('.intro').addEventListener('click', function(e){
   });
 
 document.querySelector('.difficulty').addEventListener('click', function(e){
-   if (e.target.tagName === 'BUTTON') {difficulty = e.target.textContent;
+   if (e.target.tagName === 'BUTTON') {environment.difficulty = e.target.textContent;
         document.getElementsByTagName('section')[1].classList.add('hide');
-        reset();
-        updateScorePanel();
+        environment.reset();
+        environment.updateScorePanel();
       }
   });
 
-document.querySelector('.scorepanel > button').addEventListener('click', reset);
+document.querySelector('.scorepanel > button').addEventListener('click', environment.reset.bind(environment));
 
 document.querySelector('.message').addEventListener('click', function(e){
   if(e.target.classList.contains('restart')){
-    restart();
+    environment.restart();
   }else if(e.target.tagName === 'BUTTON'){
-    reset();
+    environment.reset();
   }else{return}
 })})();

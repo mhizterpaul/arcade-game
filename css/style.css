@@ -134,14 +134,12 @@ section.intro {
     max-height: 135px;
     display: flex;
     flex-flow: column wrap;
-    justify-content: space-between;
     align-items: center;
     align-content: space-evenly;
     text-transform: capitalize;
 }
 
 .scorepanel button{
-    margin-bottom: 58px;
     transform: translateY(28px);
     width: 65px;
     height: 60px
@@ -164,7 +162,7 @@ section.intro {
 }
 
 .hide {
-    display: none !important;
+    display: none;
 }
 
 
@@ -248,5 +246,9 @@ section.intro {
     height: calc((360/344)*(100vmin - 20px));
     max-height: 75vh;
     max-width: calc(100vh - 150px);
+}
+
+canvas{
+    background-color: white;
 }
 
